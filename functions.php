@@ -176,11 +176,14 @@
 
    	////卡在数组用什么方法正确打印出来
    	foreach ($url_array as $key => $value) {
-   		printf("用户名：".$url_array['username']."<br>书签：".$url_array['bm_URL']);
+   		printf("用户名：".$url_array['username']."<br>书签：".$url_array['bm_URL']."<br>");
    		
    	}
    	 print_r($url_array);
-   	// var_dump($result2);
+   	 $count = count($url_array);
+   	 echo $count;
+   	 echo "<br>";
+   	 var_dump($url_array);
 
    	}
    	
