@@ -94,6 +94,19 @@
  ?>
 
  <?php
+    
+   function db_connect(){
+   	@$db = new mysqli('localhost','root','','bookmarks');
+   	if ($db->connect_errno) {
+   		echo "Can't connect database.";
+   		exit();
+   	}
+   	$db->query("set names utf8");
+   	return $db;
+   }
+
+
+
    function filled_out($form_vars){ //验证注册表单是否填写完整
    	foreach ($form_vars as $key => $value) {
    		if (!isset($key) || $value == '') {
@@ -152,44 +165,61 @@
    }
 
    function get_user_urls($user){
-   	//require_once 'conn.php';
-   	@$db = new mysqli('localhost','root','','bookmarks');
-    if ($db->connect_errno) {
-   	  echo "Can't connected database.";
-   	  exit();
-    }
-	   $db->query("set names 'utf8'");
-   	$query = "select * from bookmark where username = '".$user."'";
-   	$result2 = $db->query($query);
-   	$rows = $result2->fetch_assoc();
-   	return $rows;
+   	// @$db = new mysqli('localhost','root','','bookmarks');
+    // if ($db->connect_errno) {
+   	//   echo "Can't connected database.";
+   	//   exit();
+    // }
+	   // $db->query("set names 'utf8'");
+   	$db = db_connect(); //上面代码用连接数据库函数代替了
+   	$query = "select bm_URL from bookmark where username = '".$user."'";
+   	$result = $db->query($query);
+   	$num_result = $result->num_rows;
+   	$url_array = array();
 
+   	for ($i=0; $i < $num_result ; $i++) { 
+   		$row = $result->fetch_assoc();
+   		$url_array[$i] = $row;  //每次的结果赋值给新的数组$url_array 		
+   	}
+   	return $url_array;
    }
+ ?>
 
+
+ <?php
+   ////卡在数组用什么方法正确打印出来
    function display_user_urls($url_array){
-   	// $num_result = $result->num_rows;
-   	// while ($url_array) { 
-   	// 	echo "用户名：".$row['username'];
-   	// 	echo "<br>";
-   	// 	echo "书签：".$row['bm_URL'];
-   	// 	echo "<br>";
-
-   	////卡在数组用什么方法正确打印出来
-   	foreach ($url_array as $key => $value) {
-   		printf("用户名：".$url_array['username']."<br>书签：".$url_array['bm_URL']."<br>");
-   		
-   	}
-   	 print_r($url_array);
-   	 $count = count($url_array);
-   	 echo $count;
-   	 echo "<br>";
-   	 var_dump($url_array);
-
-   	}
-   	
-   
-
-   function display_user_menu(){
-
+ ?>
+   <form action="delbm.php" method="post">
+   	 <table>
+   	 	<?php
+   	 	    echo "以下是您的书签：<br>";
+          foreach ($url_array as $key => $value) {
+          	echo "<tr>
+          	        <td>书签：<td>
+          	        <td><a href=".$value['bm_URL'].">".htmlspecialchars($value['bm_URL'])."</a></td>
+          	        <td><input type='checkbox' name=".$key." value=".htmlspecialchars($value['bm_URL'])."></input></td>
+          	      </tr>";
+          }
+   	 	?>
+   	 </table>
+   </form>
+<?php
    }
+?>
+
+ <?php
+    function display_user_menu(){
+ ?>
+
+   <ul class="list-inline">
+   	<li><a href="member.php">HOME</a> | </li>
+   	<li><a href="addbm.php">Add BM</a> | </li>
+   	<li><a href="delbm.php">Delete BM</a> | </li>
+   	<li><a href="changepw.php">Change password</a> | </li>
+   	<li><a href="recommend.php">Recommend URLs to me</a> | </li>
+   	<li><a href="logout.php">Logout</a> | </li>
+   </ul>
+ <?php
+      }
  ?>
