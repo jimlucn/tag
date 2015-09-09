@@ -27,9 +27,10 @@
   
 ?>
 <form action="?" method="post">
-	标签：<input type="text" name="bm" placeholder="http://">
+	标签：<input type="text" name="bm" value="http://">
 	<input type="submit" name="submit" value="添加">
 </form>
 <?php
    display_user_menu();
+   echo $bm_table;
 ?>

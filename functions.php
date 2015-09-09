@@ -147,6 +147,23 @@
    	$db->close();
    }
 
+
+   function del_bm($del_url){
+       $db = db_connect();
+    foreach ($del_url as $value) {       
+       $query = "delete from bookmark where bm_URL = '".$value."'";
+       $result = $db->query($query);
+       echo "已删除：".$value."<br />";
+    }
+    if ($db->affected_rows) {
+      echo "删除成功";
+      do_html_url('member.php','返回标签列表页');
+    }else{
+      echo "删除失败";
+    }
+   }
+
+
    function do_html_url($url,$tittle){
    	echo "<script language=javascript>alert('".$tittle."');location.href='".$url."';</script>";
 
@@ -154,7 +171,7 @@
 
    function check_valid_user(){
    	if (isset($_SESSION['valid_user'])) {
-   		echo "欢迎您登录，".$_SESSION['valid_user']."<br>";
+   		echo "欢迎您，".$_SESSION['valid_user']."<br>";
    	}else{
    		do_html_header("Problem:");
    		echo "你还没有登录";
@@ -179,7 +196,7 @@
 
    	for ($i=0; $i < $num_result ; $i++) { 
    		$row = $result->fetch_assoc();
-   		$url_array[$i] = $row;  //每次的结果赋值给新的数组$url_array 		
+   		$url_array[$i] = $row['bm_URL'];  //每次bm_URL的结果赋值给新的数组$url_array 		
    	}
    	return $url_array;
    }
@@ -188,17 +205,21 @@
 
  <?php
    ////卡在数组用什么方法正确打印出来
+   
    function display_user_urls($url_array){
+    global $bm_table;
+   $bm_table = true;
  ?>
-   <form action="delbm.php" method="post">
+   <form action="delbm.php" method="post" name="bm_table">
    	 <table>
    	 	<?php
    	 	    echo "以下是您的书签：<br>";
-          foreach ($url_array as $key => $value) {
-          	echo "<tr>
-          	        <td>书签：<td>
-          	        <td><a href=".$value['bm_URL'].">".htmlspecialchars($value['bm_URL'])."</a></td>
-          	        <td><input type='checkbox' name=".$key." value=".htmlspecialchars($value['bm_URL'])."></input></td>
+          foreach ($url_array as $value) {
+          	echo "
+          	      <tr>
+          	        <td>书签：</td>
+          	        <td><a href=".$value.">".htmlspecialchars($value)."</a></td>
+          	        <td><input type='checkbox' name=\"del_me[]\" value=".$value."></input></td>
           	      </tr>";
           }
    	 	?>
@@ -215,7 +236,14 @@
    <ul class="list-inline">
    	<li><a href="member.php">HOME</a> | </li>
    	<li><a href="addbm.php">Add BM</a> | </li>
-   	<li><a href="delbm.php">Delete BM</a> | </li>
+ <?php
+    global $bm_table;
+    if ($bm_table == true) {
+    	echo "<li><a href='#' onClick='bm_table.submit();'>Delete BM</a> | </li>";
+    }else{
+    	echo "<li><span style='#cccccc'>Delete BM</span> | </li>";
+    }
+  ?>
    	<li><a href="changepw.php">Change password</a> | </li>
    	<li><a href="recommend.php">Recommend URLs to me</a> | </li>
    	<li><a href="logout.php">Logout</a> | </li>
