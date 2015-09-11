@@ -1,2 +1,2 @@
 # tag
-This is <php & mysql example>
+This code is php&mysql example of bm
