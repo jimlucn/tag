@@ -93,6 +93,54 @@
   }
  ?>
 
+<?php
+  function display_forgot_password_form(){  //显示忘记密码表单html
+?>
+    <form action="resetpassword.php" method="post">
+      用户名：<input type="text" name="username">
+      <input type="submit" name="submit" value="重置密码">
+    </form>
+ <?php    
+  }
+ ?>
+
+
+<?php
+   function dispaly_recommend_bm($username){
+    $db = db_connect();
+    $query = "select bm_URL from bookmark where username in(
+                                               select distinct(b2.username)
+                                               from bookmark b1, bookmark b2
+                                               where b1.username='".$username."' 
+                                               and b1.username != b2.username
+                                               and b1.bm_URL = b2.bm_URL)
+                                          and bm_URL not in(
+                                               select bm_URL from bookmark
+                                               where username='".$username."')
+                                          group by bm_URL";
+    $result = $db->query($query);
+    if($result->num_rows > 0){
+      echo "<table>";
+      //用这种for循环很巧妙
+      for ($i=0; $row = $result->fetch_row(); $i++) { 
+        echo "<tr><td>$row[0]</td></tr>";
+      }
+      //平时都用下面的for循环取值
+      // for ($i=0; $i < $result->num_rows; $i++) { 
+      //   $row = $result->fetch_row();
+      //   echo "<tr><td>$row[0]</td></tr>";
+      }
+    }
+?>
+
+   </table>
+
+<?php
+   }
+?>
+
+
+
  <?php
     
    function db_connect(){
@@ -164,6 +212,30 @@
    }
 
 
+
+   function reset_password(){
+      if ($_POST['submit']) {
+    $username = $_POST['username'];
+    for ($i=0; $i < 6 ; $i++) { 
+      $new_password .= mt_rand(0,9);
+    }
+    if (!$username) {
+      do_html_url('resetpassword.php','填写用户名');
+      exit();
+    }
+    $db = db_connect();
+    $query = "update user set passwd='".$new_password."' where username='".$username."'";
+    $result = $db->query($query);
+    if ($db->affected_rows > 0) {
+      do_html_url('login.php','密码已修改为'.$new_password);
+    }else{
+      echo "密码修改失败";
+    }
+  }
+   }
+
+
+
    function do_html_url($url,$tittle){
    	echo "<script language=javascript>alert('".$tittle."');location.href='".$url."';</script>";
 
@@ -174,12 +246,52 @@
    		echo "欢迎您，".$_SESSION['valid_user']."<br>";
    	}else{
    		do_html_header("Problem:");
-   		echo "你还没有登录";
-   		do_html_url('login.php','请登录');
+   		do_html_url('login.php','您还没有登录，请先登录');
    		do_html_footer();
    		exit();
    	}
    }
+
+  
+   function check_password($username,$old_password){
+    $db = db_connect();
+    $query = "select username,passwd from user where username='".$username."' and passwd='".$old_password."'";
+    $result = $db->query($query);
+    if ($result->num_rows > 0) {
+      return true;
+    }else{
+      return false;
+    }
+    $db->close();
+   }
+
+
+
+   function change_new_password($username,$password1){
+    $db = db_connect();
+    $query = "update user set passwd='".$password1."' where username='".$username."'";
+    $result = $db->query($query);
+    if ($db->affected_rows > 0) {
+      return true;
+    }else{
+      return false;
+    }
+    // print_r($db->affected_rows);
+    // //现在的问题是query语句是错的，按理$db->affected_rows是0，但在上面运行后是true，搞清楚是为什么
+    // //其实如果语句错了$db->affected_rows是-1，而非0都是true，所以程序就按true运行
+    // //如果查询语句正确但没有找到对应的数据进行更新$db->affected_rows是0
+    // //所以看update是否成功用$db->affected_rows>0最合理
+    // echo "<br>";
+    // var_dump($result);
+    // //$result返回的是bool值，sql语句执行了返回true，执行错误返回false
+    // //但有没有正在成功插入数据他并不知道，成功或失败都返回true
+    // echo "<br>";
+    // print_r($result);
+
+   }
+    
+
+
 
    function get_user_urls($user){
    	// @$db = new mysqli('localhost','root','','bookmarks');
@@ -218,7 +330,7 @@
           	echo "
           	      <tr>
           	        <td>书签：</td>
-          	        <td><a href=".$value.">".htmlspecialchars($value)."</a></td>
+          	        <td><a href=".$value." target=\"_blank\">".htmlspecialchars($value)."</a></td>
           	        <td><input type='checkbox' name=\"del_me[]\" value=".$value."></input></td>
           	      </tr>";
           }
@@ -251,3 +363,22 @@
  <?php
       }
  ?>
+
+
+ <?php
+    function display_changepassword_form(){
+ ?>
+   <form action="changepw.php" method="post" name="changepw">
+     <tr>
+       <td>原始密码：</td>
+       <td><input type="password" name="old_password"></td>
+       <td>新密码：</td>
+       <td><input type="password" name="new_password1"></td>
+       <td>新密码：</td>
+       <td><input type="password" name="new_password2"></td>
+       <td><input type="submit" name="submit" value="确认修改"></td>
+     </tr>
+   </form>
+<?php
+   }
+?>

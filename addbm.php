@@ -1,6 +1,7 @@
 <?php
   require_once 'functions.php';
   session_start();
+  $bm = $_POST['bm'];
   do_html_header('添加标签');
   //判断是否登录
   // if (!$_SESSION['valid_user']) {

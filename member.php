@@ -2,7 +2,7 @@
 require_once 'functions.php';
 session_start();
 
-
+do_html_header('会员中心');
 
 //连接数据库放在文件里或是引用都正常
  // @$db = new mysqli('localhost','root','','bookmarks');
@@ -31,6 +31,7 @@ if ($_POST['username'] && $_POST['password']) {
  	echo "Welcome ".$rows['username']."";
  }else{
  	do_html_url('login.php','用户名或密码错误，请重新登录');
+    exit();
 
  	 }
  	 }
@@ -39,7 +40,7 @@ if ($_POST['username'] && $_POST['password']) {
 // 	echo "找不到此用户.";
 // 	exit();
 // }
-     do_html_header('会员中心');
+     
      check_valid_user();
 
      if (!$url_array = get_user_urls($_SESSION['valid_user'])) {
